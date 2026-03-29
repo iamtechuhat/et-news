@@ -94,9 +94,25 @@ export function useGemini() {
         try {
             const prompt = `This news is about: ${headline}. Give me 3 related follow-up questions and what background context a reader needs to understand this story fully. Format as JSON with keys: background (string), followup_questions (array of 3 strings), key_people (array of objects with name and role). Return ONLY valid JSON, no markdown formatting.`;
             const result = await callAI(prompt);
-            // Parse JSON from response, handling possible markdown code fences
-            const cleaned = result.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            return JSON.parse(cleaned);
+
+            // Extract JSON block even if the model returns extra surrounding text.
+            const jsonMatch = result.match(/\{[\s\S]*\}/);
+            const jsonText = jsonMatch ? jsonMatch[0] : result;
+
+            try {
+                return JSON.parse(jsonText);
+            } catch (parseError) {
+                console.warn('[ET NewsAI] Failed to parse story arc JSON, using fallback.', parseError);
+                return {
+                    background: `Unable to parse structured story arc for: ${headline}`,
+                    followup_questions: [
+                        `What are the latest developments in: ${headline}?`,
+                        `Who are the key stakeholders in this story?`,
+                        `What should readers watch next in this topic?`,
+                    ],
+                    key_people: [],
+                };
+            }
         } catch (err) {
             throw err;
         } finally {
