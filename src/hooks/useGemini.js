@@ -1,29 +1,35 @@
 import { useState, useCallback } from 'react';
 
-const API_KEY = import.meta.env.VITE_XAI_API_KEY;
-const XAI_URL = 'https://api.x.ai/v1/chat/completions';
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 const MAX_RETRIES = 3;
 
 async function callAI(prompt, retryCount = 0) {
     if (!API_KEY || API_KEY === 'your_key_here') {
-        throw new Error('Please set a valid VITE_XAI_API_KEY in your .env file');
+        throw new Error('Please set a valid VITE_GEMINI_API_KEY in your .env file');
     }
 
-    const response = await fetch(XAI_URL, {
+    const response = await fetch(`${GEMINI_URL}?key=${API_KEY}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`,
         },
         body: JSON.stringify({
-            model: 'grok-4-1-fast',
-            stream: false,
-            temperature: 0.7,
-            max_tokens: 1024,
-            messages: [
-                { role: 'system', content: 'You are a helpful news assistant for Economic Times NewsAI.' },
-                { role: 'user', content: prompt },
+            contents: [
+                {
+                    role: 'user',
+                    parts: [
+                        {
+                            text: `You are a helpful news assistant for Economic Times NewsAI.\n\n${prompt}`,
+                        },
+                    ],
+                },
             ],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 1024,
+            },
         }),
     });
 
@@ -40,13 +46,13 @@ async function callAI(prompt, retryCount = 0) {
             throw new Error('API rate limit reached. Please wait a minute and try again.');
         }
         if (response.status === 401) {
-            throw new Error('Invalid API key. Please check your VITE_XAI_API_KEY.');
+            throw new Error('Invalid API key. Please check your VITE_GEMINI_API_KEY.');
         }
         throw new Error(errData?.error?.message || `AI API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const text = data?.choices?.[0]?.message?.content;
+    const text = data?.candidates?.[0]?.content?.parts?.map(part => part.text).join('')?.trim();
     if (!text) throw new Error('No response from AI');
     return text;
 }

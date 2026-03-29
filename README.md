@@ -1,7 +1,7 @@
 # 🗞️ ET NewsAI — AI-Native News Experience
 
 > **ET AI Hackathon 2026 — Problem Statement 8**
-> An AI-powered news platform built on Economic Times RSS, powered by xAI Grok.
+> An AI-powered news platform built on Economic Times RSS, powered by Gemini 2.5 Flash.
 
 ---
 
@@ -20,7 +20,7 @@
 
 - **Frontend:** React 18 + Vite 5
 - **Styling:** TailwindCSS 3
-- **AI Engine:** xAI Grok (`grok-4-1-fast`)
+- **AI Engine:** Google Gemini (`gemini-2.5-flash`)
 - **News Source:** Economic Times RSS via [rss2json.com](https://rss2json.com) CORS proxy
 - **Storage:** localStorage for user preferences
 - **Deployment:** Vercel (recommended)
@@ -42,10 +42,10 @@ npm install
 Create a `.env` file in the project root:
 
 ```
-VITE_XAI_API_KEY=your_xai_api_key_here
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-Get an API key from [xAI Console](https://console.x.ai/).
+Get an API key from [Google AI Studio](https://aistudio.google.com/).
 
 ### 3. Run the Dev Server
 
@@ -109,7 +109,7 @@ et-newsai/
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `VITE_XAI_API_KEY` | xAI Grok API key | Yes (for AI features) |
+| `VITE_GEMINI_API_KEY` | Gemini API key | Yes (for AI features) |
 
 > **Note:** The app works without an API key — news feed loads normally. AI features (translation, briefing, story arc) show graceful error messages when the key is missing or invalid.
 
